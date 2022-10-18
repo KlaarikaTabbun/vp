@@ -1,31 +1,44 @@
 <?php
-require_once "../config.php";
+session_start();
+	//loen sisse konfiguratsioonifailid
+
+	require_once "fnc_user.php";
+	if(!isset($_SESSION["user_id"])){
+		//jõuga viiakse page.php
+		header("Location: page.php");
+		exit();
+	}
+	//logime välja
+	if(isset($_GET["logout"])){
+		session_destroy();
+		header("Location: page.php");
+		exit();
+	}
+	require_once "header.php";
 	
-	//loome andmebaasi ühenduse
-			$conn = new mysqli($server_host, $server_user_name, $server_password, $database);
-	//määrame suhtlemisel kasutatava kooditabeli
-			$conn->set_charset("utf8");
-	//valmistame ette sql keeles päringu
-			$stmt = $conn->prepare("SELECT pealkiri, aasta, kestus, zanr, tootja, lavastaja FROM film");
-			echo $conn->error;
-			
-			//seome loetavad andmed muutujatega
-			$stmt->bind_result($title_from_db, $year_from_db, $duration_from_db, $genre_from_db, $production_from_db, $producer_from_db);
-			//täidame käsu
-			$stmt->execute();
-			echo $stmt->error;
-			//võtan andmeid
-			
-			$film_html=null;
-			//kui on oodata mitut kuid teadmata arv
-			while($stmt->fetch()){
-				
-		$film_html .= "<p>" .$title_from_db .". aasta " .$year_from_db .".  kestus " .$duration_from_db .". zanr ". $genre_from_db.". tootja " .$production_from_db.". lavastaja " .$producer_from_db .".</p> \n";
-			}
-			//sulgeme käsu
-			$stmt->close();
-			//sulgeme andmebaasi ühenduse
-			$conn->close();
+	$conn = new mysqli($server_host, $server_user_name, $server_password, $database);
+//määrame suhtlemisel kasutatava kooditabeli
+$conn->set_charset("utf8");
+//valmistame ette SQL keeles päringu
+$stmt = $conn->prepare("SELECT pealkiri, aasta, kestus, zanr, tootja, lavastaja FROM film");
+echo $conn->error;
+//seome loetavad andmed muutujatega
+$stmt->bind_result($title, $year, $duration, $genre, $studio, $director);
+//täidame käsu
+$stmt->execute();
+echo $stmt->error;
+
+$film_html = null;
+while($stmt->fetch()){
+	$film_html .= "<h3>" .$title ."</h3>"
+  ."<ul>"
+  ."<li>Valmimisaasta:" .$year ."</li>"
+    ."<li>Kestus:" .$duration ."</li>"
+  ."<li>Žanr:" .$genre ."</li>"
+    ."<li>Tootja:" .$studio ."</li>"
+    ."<li>Lavastaja:" .$director ."</li>"
+  ."</ul>";
+}
 ?>
 <!DOCTYPE html>
 <html>
